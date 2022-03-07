@@ -29,7 +29,6 @@ def listen():
 		global coopClients
 		message, address = clientSocket.recvfrom(8192)
 		message = pickle.loads(message)
-		print("MESSAGE RECIEVED: " + message[0])
 		if (message[0] == "turn_start"):
 			player_action()
 		elif (message[0] == "get_hand"):
@@ -289,15 +288,19 @@ while (True):
 		message = raw_input('Type a command here: ') # raw_input is used because general2 is running python 2.7.5
 		command = tuple(map(str, message.split(' ')))
 
-		if (command[0] == "pm"):
-			clientSocket.sendto(message.encode(), (command[1], int(command[2])))
-		elif (command[0] == "l"):
+		if (command[0] == "l"):
 			listen()
 		elif (command[0] == "query" and command[1] == "players"):
 			clientSocket.sendto(message.encode(), (serverName, serverPort))
 			returned_message, serverAddress = clientSocket.recvfrom(8192)
+			returned_message = pickle.loads(returned_message)
 
-			print  (pickle.loads(returned_message))
+			print  (returned_message[1])
+		elif (command[0] == "query" and command[1] == "games"):
+			clientSocket.sendto(message.encode(), (serverName, serverPort))
+			returned_message, serverAddress = clientSocket.recvfrom(8192)
+
+			print(returned_message.decode())
 		else: 
 			clientSocket.sendto(message.encode(), (serverName, serverPort))
 
@@ -337,6 +340,6 @@ while (True):
 				returned_message = pickle.loads(returned_message)
 				if ( returned_message[0] == "SUCCESS"):
 					player_info = returned_message[1]
-					print(player_info.name)
+					print(returned_message[0])
 			else:
 				print(returned_message.decode())

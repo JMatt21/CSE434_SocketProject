@@ -58,21 +58,18 @@ def de_register(user):
 def query_players():
 	players = ""
 	for r_user in registered_users:
-		players += (r_user.name + ": " + r_user.IPv4 + ":" + str(r_user.port) + "\n")
+		players += (r_user.name + ": " + r_user.IPv4 + ":" + str(r_user.port) +  "\n")
 	return ("SUCCESS", players)
 
 # This function returns the number of games currently running at the moment
 # will later return a message with the game data
 def query_games():
-	numOfGames = len(concurrent_games)
-	if (numOfGames == 0):
+	if (game_id == 0):
 		return "There are no games being played at the moment."
-	elif (numOfGames == 1):
+	elif (game_id == 1):
 		return "There is one game being played at the moment." 
-		# TODO return details of the game
 	else:
-		return "There are " + str(numOfGames) + " games being played at the moment." 
-		# TODO return details of the games
+		return "There are " + str(game_id) + " games being played at the moment." 
 
 def get_client_name(IPv4, port):
 	for r_user in registered_users:
@@ -105,6 +102,7 @@ def game_start(user_dealer, k):
 		if (len(collected_players) < k + 1):
 			print("cant start game: not enough players in queue")
 			return ("FAILURE", [])
+		
 		for players in collected_players:
 			# There are enough players to start a game
 			# Set the current player to be in a game
@@ -124,7 +122,7 @@ def game_start(user_dealer, k):
 		new_game = Game(game_id, user_dealer, collected_players)
 		return ("SUCCESS", new_game)
 
-def game_end(game_idd, user_dealer):
+def game_end(game_id, user_dealer):
 	# The dealer sends a message to the manager that the game has ended
 	# In this message, the dealer sends the game_id in the message
 	# The manager will check the ID of the game along and compare it's dealer info with 'user_dealer'
@@ -154,9 +152,10 @@ while True:
 		serverSocket.sendto( de_register(get_client_name(clientAddress[0], clientAddress[1])).encode(), clientAddress )
 	elif (command[0] == "query"):
 		if   (command[1] == "players"):
-			# serverSocket.sendto( query_players().encode(), clientAddress)
-			serverSocket.sendto( pickle.dumps(query_players()), clientAddress)
+			print("QP")
+			serverSocket.sendto( pickle.dumps( query_players() ), clientAddress)
 		elif (command[1] == "games"):
+			print("QG")
 			serverSocket.sendto( query_games().encode(), clientAddress)
 		else:
 			serverSocket.sendto("INVALID COMMAND: " + message, clientAddress)
